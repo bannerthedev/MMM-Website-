@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MMM League — Ticket</title>
+<style>
+  :root{
+    --bg1:#0f1724;
+    --bg2:#2b3b48;
+    --accent:#5aa0ff;
+    --muted:#cbd5e1;
+    --nav-height:68px;
+    --max-width:1100px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  html,body{
+    margin:0;height:100%;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:#fff;-webkit-font-smoothing:antialiased;
+  }
+  .page{min-height:100vh;display:flex;flex-direction:column;}
+  header{
+    height:var(--nav-height);
+    display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    position:sticky;top:0;
+    backdrop-filter:blur(6px);z-index:30;
+  }
+  .nav-inner{
+    width:100%;max-width:1200px;
+    padding:10px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    box-sizing:border-box;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand img{height:40px;width:auto;display:block;}
+  .brand .title{font-weight:700;letter-spacing:0.6px;}
+  nav{display:flex;gap:16px;align-items:center;}
+  nav a{
+    color:rgba(255,255,255,0.85);text-decoration:none;
+    padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;
+  }
+  nav a.active{color:var(--accent);}
+  .actions{display:flex;gap:10px;align-items:center;}
+  .btn{
+    padding:9px 14px;border-radius:10px;font-weight:700;
+    border:1px solid rgba(255,255,255,0.06);
+    cursor:pointer;text-decoration:none;
+    display:inline-flex;align-items:center;gap:8px;
+    color:#fff;background:transparent;font-size:14px;
+  }
+  .btn.discord{background:#5865F2;}
+  .btn.youtube{background:#FF0000;}
+
+  .wrap{
+    max-width:var(--max-width);
+    margin:28px auto 40px;
+    padding:0 20px;
+    box-sizing:border-box;
+    flex:1;
+  }
+  h1{margin:0 0 6px;}
+  .muted{color:var(--muted);}
+  .buttons{display:flex;gap:12px;margin:16px 0 24px;flex-wrap:wrap;}
+  .btn-topic{
+    background:#0c1220;
+    border-radius:10px;
+    padding:10px 16px;
+    border:1px solid rgba(255,255,255,0.04);
+    cursor:pointer;
+    color:var(--accent);
+    font-weight:700;
+  }
+
+  /* chat drawer */
+  .chat-drawer{
+    position:fixed;right:20px;bottom:20px;
+    width:360px;max-height:70vh;
+    background:#07101a;border-radius:12px;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.04);
+  }
+  .chat-header{
+    padding:12px;
+    display:flex;align-items:center;gap:10px;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+  }
+  .ai-pill{
+    width:36px;height:36px;
+    border-radius:999px;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    color:#002;
+    font-weight:800;
+  }
+  .chat-body{
+    padding:12px;
+    overflow:auto;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .msg{
+    max-width:85%;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:14px;
+    white-space:pre-wrap;
+  }
+  .msg.ai{background:#071427;color:var(--muted);align-self:flex-start;}
+  .msg.user{background:linear-gradient(90deg,#2b7bff,#5aa0ff);color:#001;align-self:flex-end;}
+  .chat-input{
+    display:flex;gap:8px;
+    padding:10px;
+    border-top:1px solid rgba(255,255,255,0.02);
+  }
+  .input{
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    background:#07101a;
+    border:1px solid rgba(255,255,255,0.04);
+    color:#fff;
+  }
+  .small{font-size:12px;color:var(--muted);}
+  @media (max-width:880px){
+    nav{display:none;}
+    .chat-drawer{width:92%;right:4%;bottom:10px;}
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="nav-inner">
+        <div class="brand">
+          <img src="MMM logo.png" alt="MMM League logo">
+          <div class="title">MMM League</div>
+        </div>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html">Teams</a>
+          <a href="content.html">Content</a>
+          <a href="rules.html">Rules</a>
+          <a href="standings.html">Standings</a>
+          <a href="ticket.html" class="active">Ticket</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn discord" href="https://discord.gg/mmml" target="_blank" rel="noopener">Discord</a>
+          <a class="btn youtube" href="https://www.youtube.com/@MMM_League" target="_blank" rel="noopener">YouTube</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <h1>Ticket</h1>
+      <p class="muted">
+        Choose a category then chat with MMM Assistant. Say "I would like to speak to staff" or click Escalate to open a ticket.
+      </p>
+
+      <div class="buttons">
+        <button class="btn-topic" data-topic="website">Website Help</button>
+        <button class="btn-topic" data-topic="general">General Help</button>
+        <button class="btn-topic" data-topic="report">Report A Player</button>
+      </div>
+    </main>
+
+    <!-- Chat drawer -->
+    <div id="chatDrawer" class="chat-drawer" style="display:none" aria-hidden="true">
+      <div class="chat-header">
+        <div class="ai-pill">M</div>
+        <div>
+          <div style="font-weight:800">MMM Assistant</div>
+          <div id="chatTopic" class="small">Support</div>
+        </div>
+        <div style="margin-left:auto">
+          <button id="escalateBtn" class="btn" style="padding:6px 10px;font-size:13px">Escalate</button>
+        </div>
+      </div>
+
+      <div id="chatBody" class="chat-body" role="log" aria-live="polite"></div>
+
+      <div class="chat-input">
+        <input id="chatInput" class="input" placeholder="Type your message..." />
+        <button id="sendBtn" class="btn">Send</button>
+      </div>
+    </div>
+
+    <footer style="padding:16px 20px;color:var(--muted);text-align:center;border-top:1px solid rgba(255,255,255,0.02)">
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* Configure these to match your mod/ticket bot */
+const API_BASE = "https://mmm-moderation-bot-production.up.railway.app"; // example
+const AI_REPLY_URL = API_BASE + "/ai/reply";
+const TICKET_CREATE_URL = API_BASE + "/tickets/create";
+const MESSAGES_URL = API_BASE + "/tickets/messages";
+
+let sessionId = null;
+let topicSelected = null;
+let escalated = false;
+let lastIndex = 0;
+
+const drawer = document.getElementById('chatDrawer');
+const bodyEl = document.getElementById('chatBody');
+const topicEl = document.getElementById('chatTopic');
+const input = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const escalateBtn = document.getElementById('escalateBtn');
+
+function newSession(){
+  sessionId = 's_' + Math.random().toString(36).slice(2,10);
+  lastIndex = 0;
+  return sessionId;
+}
+
+function appendMessage(text, who='ai'){
+  const d = document.createElement('div');
+  d.className = 'msg ' + (who === 'ai' ? 'ai' : 'user');
+  d.textContent = text;
+  bodyEl.appendChild(d);
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+}
+
+function collectTranscript(){
+  const msgs = Array.from(bodyEl.querySelectorAll('.msg'));
+  return msgs.map(m => (m.classList.contains('user') ? 'User: ' : 'MMM Assistant: ') + m.textContent).join("\n");
+}
+
+function openDrawer(topic){
+  newSession();
+  topicSelected = topic;
+  escalated = false;
+  topicEl.textContent = topic === 'website' ? 'Website Help'
+                      : topic === 'general' ? 'General Help'
+                      : 'Report A Player';
+  drawer.style.display = '';
+  drawer.setAttribute('aria-hidden','false');
+  bodyEl.innerHTML = '';
+  appendMessage("Hey there my name is MMM Assistant how may i help you?", 'ai');
+}
+
+async function escalateToStaff(reason){
+  appendMessage("Opening ticket for staff...", 'ai');
+  escalated = true;
+
+  try{
+    const payload = {
+      session_id: sessionId,
+      user_name: "WebsiteUser",
+      user_id: null, // if you know the Discord ID, put it here
+      reason,
+      transcript: collectTranscript()
+    };
+    const headers = {"content-type":"application/json"};
+    if(API_KEY) headers["x-api-key"] = API_KEY;
+    const res = await fetch(TICKET_CREATE_URL, { method:'POST', headers, body: JSON.stringify(payload) });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    if(data.success){
+      appendMessage("Your request has been sent to staff. You can keep typing here and staff will see your messages.", 'ai');
+    } else {
+      appendMessage("Failed to create ticket. Contact staff on Discord.", 'ai');
+    }
+  }catch(e){
+    console.error(e);
+    appendMessage("Failed to open ticket. Contact staff on Discord.", 'ai');
+  }
+}
+
+async function sendToAI(msg){
+  appendMessage(msg,'user');
+
+  // After escalation: send messages only to staff, no AI
+  if (escalated) {
+    try{
+      const payload = {
+        session_id: sessionId,
+        user_name: "WebsiteUser",
+        user_id: null,
+        reason: topicSelected || "general",
+        transcript: `User: ${msg}`
+      };
+      const headers = {"content-type":"application/json"};
+      if(API_KEY) headers["x-api-key"] = API_KEY;
+      const res = await fetch(TICKET_CREATE_URL, { method:'POST', headers, body: JSON.stringify(payload) });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      appendMessage("Your message has been sent to staff.", 'ai');
+    }catch(e){
+      console.error(e);
+      appendMessage("Failed to send message to staff. Please contact staff on Discord.", 'ai');
+    }
+    return;
+  }
+
+  // Before escalation: talk to AI
+  try{
+    const payload = { session_id: sessionId, message: msg, topic: topicSelected };
+    const headers = {"content-type":"application/json"};
+    if(API_KEY) headers["x-api-key"] = API_KEY;
+    const res = await fetch(AI_REPLY_URL, { method:'POST', headers, body: JSON.stringify(payload) });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const reply = data.reply ?? "Sorry, I can't respond right now.";
+    appendMessage(reply,'ai');
+
+    // If user explicitly asks, escalate
+    if(/i would like to speak to staff/i.test(msg) || /i would like to speak to the staff/i.test(msg)){
+      await escalateToStaff("User requested staff");
+    }
+  }catch(e){
+    console.error(e);
+    appendMessage("MMM Assistant is unavailable. Click Escalate to contact staff.", 'ai');
+  }
+}
+
+async function pollMessages(){
+  if (!sessionId) return;
+  try{
+    const url = MESSAGES_URL + "?session_id=" + encodeURIComponent(sessionId) +
+                "&since=" + encodeURIComponent(lastIndex);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const msgs = data.messages || [];
+    const newIndex = (data.next_index !== undefined) ? data.next_index : lastIndex;
+
+    // Append only assistant/staff messages that we haven't rendered ourselves
+    msgs.forEach(m => {
+      // we already append user messages when sending, so only show assistant/staff here
+      if (m.from === "assistant" || m.from === "staff") {
+        appendMessage(m.text, 'ai');
+      }
+    });
+
+    lastIndex = newIndex;
+  }catch(e){
+    console.error("pollMessages error", e);
+  }
+}
+
+/* UI wiring */
+document.querySelectorAll('.btn-topic[data-topic]').forEach(b =>
+  b.addEventListener('click', () => openDrawer(b.dataset.topic))
+);
+sendBtn.addEventListener('click', () => {
+  const txt = input.value.trim();
+  if(!txt) return;
+  input.value = '';
+  sendToAI(txt);
+});
+input.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+escalateBtn.addEventListener('click', () => escalateToStaff("User clicked escalate"));
+
+// Poll every 3 seconds for replies from AI/staff (via Discord)
+setInterval(pollMessages, 3000);
+</script>
+</body>
+</html>

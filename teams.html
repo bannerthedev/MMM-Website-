@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MMM League – Teams</title>
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#2b3b48;
+      --accent:#ff7b26;
+      --muted:#cbd5e1;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .page{min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Header (same layout style as rules.html) */
+    header{
+      height:68px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      position:sticky;
+      top:0;
+      backdrop-filter:blur(6px);
+      z-index:30;
+      background:rgba(2,6,23,0.85);
+    }
+    .nav-inner{
+      width:100%;
+      max-width:1200px;
+      padding:10px 20px;
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      text-decoration:none;
+      color:inherit;
+    }
+    .brand img{height:34px;width:auto;display:block;}
+    .brand .title{font-weight:800;letter-spacing:0.3px;}
+
+    nav{display:flex;gap:16px;align-items:center;}
+    nav a{
+      color:rgba(255,255,255,0.85);
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:8px;
+      font-weight:600;
+      font-size:14px;
+    }
+    nav a.active{color:var(--accent);}
+
+    .right-muted{color:var(--muted);font-size:14px;white-space:nowrap;}
+
+    /* Main */
+    main{flex:1;}
+    .section{
+      max-width:1100px;
+      margin:20px auto 40px;
+      padding:0 20px;
+      box-sizing:border-box;
+      width:100%;
+    }
+    h1{margin:0 0 8px;font-size:26px;}
+    .section-sub{margin:0 0 18px;color:var(--muted);font-size:14px;}
+
+    .content-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:14px;
+    }
+    .content-card{
+      border-radius:12px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:12px 12px 14px;
+    }
+    .team-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .team-logo{
+      width:32px;height:32px;border-radius:999px;
+      background:#1f2933;display:flex;align-items:center;justify-content:center;
+      overflow:hidden;flex-shrink:0;
+    }
+    .team-logo img{width:100%;height:100%;object-fit:cover;}
+    .team-name{font-weight:700;font-size:15px;}
+    .team-founded{font-size:12px;color:var(--muted);margin-bottom:6px;}
+    .team-role-bar{
+      border-radius:10px;padding:8px 10px;font-size:12px;margin-bottom:6px;
+      background:rgba(0,0,0,0.2);
+    }
+    .team-role-label{
+      font-weight:700;text-transform:uppercase;font-size:11px;margin-bottom:3px;
+    }
+    .team-members{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+    .team-member-pill{
+      padding:4px 8px;border-radius:999px;
+      background:rgba(0,0,0,0.25);font-size:11px;
+    }
+
+    footer{
+      margin-top:auto;
+      padding:24px 20px;
+      color:#9ca3af;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.02);
+    }
+
+    @media (max-width:920px){
+      nav{display:none;}
+      .right-muted{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <img src="MMM logo.png" alt="MMM League logo">
+          <div class="title">MMM League</div>
+        </a>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html" class="active">Teams</a>
+          <a href="content.html">Content</a>
+          <a href="rules.html">Rules</a>
+          <a href="standings.html">Standings</a>
+        </nav>
+
+        <!-- Same right-side text style as rules.html -->
+        <div class="right-muted">Auto-updates from The Discord Bot</div>
+      </div>
+    </header>
+
+    <main class="section">
+      <h1>Teams</h1>
+      <p class="section-sub">All registered MMM League teams. Auto-synced with the Discord server.</p>
+
+      <div id="teamsGrid" class="content-grid"></div>
+      <p id="teamsStatus" class="section-sub" style="margin-top:14px;"></p>
+    </main>
+
+    <footer>
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const API_BASE = "https://mmm-transactions-bot-v2-production.up.railway.app";
+  const TEAMS_API_URL = API_BASE + "/teams";
+
+  function formatFounded(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+  }
+
+  function renderTeams(teams) {
+    const grid = document.getElementById("teamsGrid");
+    const status = document.getElementById("teamsStatus");
+    grid.innerHTML = "";
+    status.textContent = "";
+
+    if (!teams.length) {
+      status.textContent = "No teams registered yet.";
+      return;
+    }
+
+    teams.sort((a, b) => a.name.localeCompare(b.name));
+
+    teams.forEach(team => {
+      const card = document.createElement("div");
+      card.className = "content-card";
+
+      const baseColor = team.color || "#4b5563";
+
+      const header = document.createElement("div");
+      header.className = "team-header";
+
+      const logoWrap = document.createElement("div");
+      logoWrap.className = "team-logo";
+      if (team.logo_url) {
+        const img = document.createElement("img");
+        img.src = team.logo_url;
+        img.alt = team.name + " logo";
+        logoWrap.appendChild(img);
+      } else {
+        const span = document.createElement("span");
+        span.textContent = team.name[0]?.toUpperCase() || "?";
+        span.style.fontWeight = "700";
+        logoWrap.appendChild(span);
+      }
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "team-name";
+      nameEl.textContent = team.name;
+
+      header.appendChild(logoWrap);
+      header.appendChild(nameEl);
+
+      const foundedEl = document.createElement("div");
+      foundedEl.className = "team-founded";
+      const foundedText = formatFounded(team.founded);
+      if (foundedText) foundedEl.textContent = "Founded " + foundedText;
+
+      card.appendChild(header);
+      card.appendChild(foundedEl);
+
+      // TEAM EXECUTIVES
+      const executives = team.executives || [];
+      const execBar = document.createElement("div");
+      execBar.className = "team-role-bar";
+      execBar.style.background = baseColor + "44";
+
+      const execLabel = document.createElement("div");
+      execLabel.className = "team-role-label";
+      execLabel.textContent = `TEAM EXECUTIVES - ${executives.length}`;
+
+      const execWrap = document.createElement("div");
+      execWrap.className = "team-members";
+
+      if (executives.length) {
+        executives.forEach(e => {
+          const pill = document.createElement("span");
+          pill.className = "team-member-pill";
+          pill.textContent = e;
+          execWrap.appendChild(pill);
+        });
+      } else {
+        const pill = document.createElement("span");
+        pill.className = "team-member-pill";
+        pill.textContent = "None";
+        execWrap.appendChild(pill);
+      }
+
+      execBar.appendChild(execLabel);
+      execBar.appendChild(execWrap);
+      card.appendChild(execBar);
+
+      // Captain
+      const capBar = document.createElement("div");
+      capBar.className = "team-role-bar";
+      capBar.style.background = baseColor + "33";
+
+      const capLabel = document.createElement("div");
+      capLabel.className = "team-role-label";
+      capLabel.textContent = "CAPTAIN";
+
+      const capValue = document.createElement("div");
+      capValue.textContent = team.captain || "None";
+
+      capBar.appendChild(capLabel);
+      capBar.appendChild(capValue);
+      card.appendChild(capBar);
+
+      // CO-CAPTAINS
+      const coCaps = team.co_captains || [];
+      const coCapBar = document.createElement("div");
+      coCapBar.className = "team-role-bar";
+      coCapBar.style.background = baseColor + "2a";
+
+      const coLabel = document.createElement("div");
+      coLabel.className = "team-role-label";
+      coLabel.textContent = `CO-CAPTAINS - ${coCaps.length}`;
+
+      const coWrap = document.createElement("div");
+      coWrap.className = "team-members";
+
+      if (coCaps.length) {
+        coCaps.forEach(c => {
+          const pill = document.createElement("span");
+          pill.className = "team-member-pill";
+          pill.textContent = c;
+          coWrap.appendChild(pill);
+        });
+      } else {
+        const pill = document.createElement("span");
+        pill.className = "team-member-pill";
+        pill.textContent = "None";
+        coWrap.appendChild(pill);
+      }
+
+      coCapBar.appendChild(coLabel);
+      coCapBar.appendChild(coWrap);
+      card.appendChild(coCapBar);
+
+      // MEMBERS
+      const memBar = document.createElement("div");
+      memBar.className = "team-role-bar";
+      memBar.style.background = baseColor + "22";
+
+      const memLabel = document.createElement("div");
+      memLabel.className = "team-role-label";
+      const count = (team.members || []).length;
+      memLabel.textContent = `MEMBERS - ${count}`;
+
+      const memWrap = document.createElement("div");
+      memWrap.className = "team-members";
+
+      (team.members || []).forEach(m => {
+        const pill = document.createElement("span");
+        pill.className = "team-member-pill";
+        pill.textContent = m;
+        memWrap.appendChild(pill);
+      });
+
+      memBar.appendChild(memLabel);
+      memBar.appendChild(memWrap);
+      card.appendChild(memBar);
+
+      grid.appendChild(card);
+    });
+  }
+
+  async function fetchTeams() {
+    const status = document.getElementById("teamsStatus");
+    status.textContent = "Loading teams…";
+    try {
+      const res = await fetch(TEAMS_API_URL);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      renderTeams(data.teams || []);
+    } catch (e) {
+      console.error("Failed to load teams", e);
+      status.textContent = "Failed to load teams.";
+    }
+  }
+
+  fetchTeams();
+  setInterval(fetchTeams, 60000);
+</script>
+</body>
+</html>

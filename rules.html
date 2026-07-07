@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MMM League – Rules</title>
+<style>
+  :root{
+    --bg1:#0f1724; --bg2:#2b3b48; --muted:#cbd5e1; --accent:#ff7b26;
+    --card-bg: rgba(255,255,255,0.02);
+    --nav-w: 300px;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#fff}
+  .page{min-height:100vh;display:flex;flex-direction:column}
+
+  header{
+    height:68px;
+    display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    position:sticky;top:0;backdrop-filter:blur(6px);z-index:30;
+  }
+  .nav-inner{
+    width:100%;max-width:1200px;
+    padding:10px 20px;box-sizing:border-box;
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+  }
+  nav{display:flex;gap:16px;align-items:center}
+  nav a{
+    color:rgba(255,255,255,0.85);
+    text-decoration:none;
+    padding:8px 10px;border-radius:8px;
+    font-weight:600;font-size:14px;
+  }
+  nav a.active{color:var(--accent)}
+
+  .wrap{max-width:1200px;margin:28px auto;padding:0 20px;box-sizing:border-box;display:flex;gap:20px}
+  /* left nav */
+  #rulesNav{width:var(--nav-w);display:flex;flex-direction:column;gap:10px}
+  .rule-tab{
+    background: linear-gradient(90deg,#0b1220,#162033);
+    border:1px solid rgba(255,255,255,0.04);
+    padding:12px 14px;border-radius:10px;color:#e6eefc;font-weight:700;text-align:left;
+    cursor:pointer;transition:transform .08s, background .12s;
+  }
+  .rule-tab:hover{transform:translateY(-2px)}
+  .rule-tab.selected{
+    background: linear-gradient(90deg,var(--accent),#b55cff);
+    color:#001;
+  }
+  /* content */
+  #rulesContent{
+    flex:1;
+    background:var(--card-bg);
+    border-radius:12px;
+    padding:20px;
+    border:1px solid rgba(255,255,255,0.03);
+    overflow:auto;
+    min-height:360px
+  }
+  #rulesContent h2{margin-top:0}
+
+  /* small screen */
+  @media (max-width:920px){
+    nav{display:none;}
+    .wrap{flex-direction:column}
+    #rulesNav{width:100%;display:flex;overflow:auto;flex-direction:row;gap:8px}
+    .rule-tab{white-space:nowrap;padding:10px 12px;flex:0 0 auto}
+  }
+
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="nav-inner">
+        <a href="index.html" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+          <img src="MMM logo.png" alt="MMM League logo" style="height:34px">
+          <div style="font-weight:800">MMM League</div>
+        </a>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html">Teams</a>
+          <a href="content.html">Content</a>
+          <a href="rules.html" class="active">Rules</a>
+          <a href="standings.html">Standings</a>
+        </nav>
+
+        <div class="muted">Auto-updates from Google Docs</div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <nav id="rulesNav" aria-label="Rules navigation"></nav>
+      <article id="rulesContent" aria-live="polite">Loading rules…</article>
+    </main>
+
+    <footer style="padding:24px 20px;color:#9ca3af;text-align:center;border-top:1px solid rgba(255,255,255,0.02)">
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // If your web API is on a different origin, set full URL here:
+  const RULES_API = "https://mmm-transactions-bot-v2-production.up.railway.app/rules"; // or "https://mmm-transactions-bot-v2-production.up.railway.app/rules"
+
+  function sanitizeHtml(html) {
+    return (html || "").replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+  }
+
+  function clearSelected(nav) {
+    nav.querySelectorAll('.rule-tab').forEach(b => b.classList.remove('selected'));
+  }
+
+  function renderSections(sections) {
+    const nav = document.getElementById('rulesNav');
+    const content = document.getElementById('rulesContent');
+    nav.innerHTML = '';
+    content.innerHTML = '';
+
+    if (!sections || !sections.length) {
+      content.textContent = "No rules found.";
+      return;
+    }
+
+    let openedByHash = false;
+
+    sections.forEach((s) => {
+      const btn = document.createElement('button');
+      btn.type = "button";
+      btn.className = 'rule-tab';
+      btn.textContent = s.title;
+      btn.dataset.sectionId = s.id;
+
+      btn.addEventListener('click', () => {
+        clearSelected(nav);
+        btn.classList.add('selected');
+        content.innerHTML = `<h2>${s.title}</h2>` + sanitizeHtml(s.html);
+        try { history.replaceState(null, "", "#" + s.id); } catch (e) {}
+        content.scrollTop = 0;
+      });
+
+      nav.appendChild(btn);
+
+      if (location.hash === '#' + s.id) {
+        openedByHash = true;
+        setTimeout(() => btn.click(), 0);
+      }
+    });
+
+    if (!openedByHash) {
+      nav.querySelector('.rule-tab')?.click();
+    }
+  }
+
+  async function loadRules() {
+    const content = document.getElementById('rulesContent');
+    try {
+      const res = await fetch(RULES_API, { method: 'GET' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      renderSections(data.sections || []);
+    } catch (e) {
+      content.textContent = 'Failed to load rules: ' + e.message;
+      console.error('rules load error', e);
+    }
+  }
+
+  loadRules();
+  setInterval(loadRules, 5 * 60 * 1000);
+</script>
+</body>
+</html>

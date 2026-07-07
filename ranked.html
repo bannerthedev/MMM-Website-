@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MMM League – Ranked</title>
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#2b3b48;
+      --accent:#ff7b26;
+      --muted:#cbd5e1;
+      --card: rgba(255,255,255,0.03);
+      --nav-height:68px;
+      --max-width:1100px;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    html,body{
+      height:100%; margin:0;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#fff; -webkit-font-smoothing:antialiased;
+    }
+    .page{min-height:100vh;display:flex;flex-direction:column;}
+    header{
+      height:var(--nav-height);
+      display:flex;align-items:center;justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      position:sticky;top:0;
+      backdrop-filter:blur(6px);z-index:30;
+    }
+    .nav-inner{
+      width:100%;max-width:1200px;
+      padding:10px 20px;
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      box-sizing:border-box;
+    }
+    .brand{display:flex;align-items:center;gap:12px;}
+    .brand img{height:40px;width:auto;display:block;}
+    .brand .title{font-weight:700;letter-spacing:0.6px;}
+    nav{display:flex;gap:16px;align-items:center;}
+    nav a{
+      color:rgba(255,255,255,0.85);text-decoration:none;
+      padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;
+    }
+    nav a.active{color:var(--accent);}
+    .actions{display:flex;gap:10px;align-items:center;}
+    .btn{
+      padding:9px 14px;border-radius:10px;font-weight:700;
+      border:1px solid rgba(255,255,255,0.06);
+      cursor:pointer;text-decoration:none;
+      display:inline-flex;align-items:center;gap:8px;
+      color:#fff;background:transparent;font-size:14px;
+    }
+    .btn.discord{background:#5865F2;}
+    .btn.youtube{background:#FF0000;}
+
+    .section{
+      width:100%;
+      max-width:var(--max-width);
+      margin:20px auto 40px;
+      padding:0 20px;
+      box-sizing:border-box;
+    }
+    h1{margin:0 0 8px;font-size:26px;}
+    .section-sub{margin:0 0 18px;color:var(--muted);font-size:14px;}
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:10px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+    .tab-btn{
+      padding:8px 16px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.1);
+      background:transparent;
+      color:#fff;
+      font-size:14px;
+      cursor:pointer;
+    }
+    .tab-btn.active{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#000;
+    }
+
+    /* Ranked queues */
+    .queue-card{
+      background:rgba(15,23,42,0.9);
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,0.4);
+      padding:12px 16px;
+      margin-bottom:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .queue-header-text{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:0.18em;
+      color:#9ca3af;
+    }
+    .queue-subtext{
+      font-size:12px;
+      color:#9ca3af;
+    }
+    .queue-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .queue-code{
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:0.18em;
+    }
+    .queue-bar{
+      flex:0 0 140px;
+      height:6px;
+      border-radius:999px;
+      background:#111827;
+      overflow:hidden;
+    }
+    .queue-fill{
+      height:100%;
+      background:#22c55e;
+      width:0%;
+      transition:width 0.15s ease;
+    }
+    .queue-count{
+      font-size:11px;
+      color:#9ca3af;
+      text-align:right;
+      margin-top:2px;
+    }
+
+    /* Players leaderboard */
+    .sort-row{
+      display:flex;
+      gap:8px;
+      margin:8px 0 14px;
+      flex-wrap:wrap;
+    }
+    .sort-btn{
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.1);
+      background:transparent;
+      color:#fff;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .sort-btn.active{
+      background:var(--accent);
+      color:#000;
+      border-color:var(--accent);
+    }
+    .table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    .table th,
+    .table td{
+      padding:8px 6px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .table th{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:0.14em;
+      color:#9ca3af;
+    }
+    .rank-col{width:50px;}
+    .num{font-variant-numeric:tabular-nums;}
+    footer{
+      padding:16px 20px;
+      color:#9ca3af;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="nav-inner">
+        <div class="brand">
+          <img src="mmm-logo.png" alt="MMM League logo">
+          <div class="title">MMM League</div>
+        </div>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html">Teams</a>
+          <a href="content.html">Content</a>
+          <a href="rules.html">Rules</a>
+          <a href="standings.html">Standings</a>
+          <a href="ranked.html" class="active">Ranked</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn discord" href="https://discord.gg/mmml" target="_blank" rel="noopener">Discord</a>
+          <a class="btn youtube" href="https://www.youtube.com/@MMM_League" target="_blank" rel="noopener">YouTube</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <h1>Ranked</h1>
+      <p class="section-sub">
+        View active ranked lobbies and player stats powered by the MMM Ranked bot.
+      </p>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tabRanked">Ranked</button>
+        <button class="tab-btn" id="tabPlayers">Players</button>
+      </div>
+
+      <!-- Ranked queues panel -->
+      <div id="panelRanked">
+        <div id="rankedContent"></div>
+        <p id="rankedStatus" class="section-sub" style="margin-top:10px;"></p>
+      </div>
+
+      <!-- Players panel -->
+      <div id="panelPlayers" style="display:none;">
+        <div class="sort-row">
+          <button class="sort-btn active" data-sort="overall">Overall</button>
+          <button class="sort-btn" data-sort="mmr">MMR</button>
+          <button class="sort-btn" data-sort="playtime">Playtime</button>
+        </div>
+        <div id="playersWrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="rank-col">#</th>
+                <th>Player</th>
+                <th>MMR</th>
+                <th>Playtime</th>
+              </tr>
+            </thead>
+            <tbody id="playersBody"></tbody>
+          </table>
+        </div>
+        <p id="playersStatus" class="section-sub" style="margin-top:10px;"></p>
+      </div>
+    </main>
+
+    <footer>
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // CHANGE to your real Railway base URL (no trailing slash)
+    const API_BASE = "https://YOUR-RAILWAY-APP.up.railway.app";
+
+    // ---------- Tabs ----------
+    const tabRanked = document.getElementById('tabRanked');
+    const tabPlayers = document.getElementById('tabPlayers');
+    const panelRanked = document.getElementById('panelRanked');
+    const panelPlayers = document.getElementById('panelPlayers');
+
+    tabRanked.addEventListener('click', () => {
+      tabRanked.classList.add('active');
+      tabPlayers.classList.remove('active');
+      panelRanked.style.display = '';
+      panelPlayers.style.display = 'none';
+    });
+
+    tabPlayers.addEventListener('click', () => {
+      tabPlayers.classList.add('active');
+      tabRanked.classList.remove('active');
+      panelPlayers.style.display = '';
+      panelRanked.style.display = 'none';
+      fetchPlayers(); // load when opened
+    });
+
+    // ---------- Ranked queues ----------
+    async function fetchRankedQueues() {
+      const container = document.getElementById('rankedContent');
+      const status = document.getElementById('rankedStatus');
+      container.innerHTML = '';
+      status.textContent = 'Loading ranked lobbies…';
+
+      try {
+        const res = await fetch(API_BASE + "/ranked/queues");
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        const linked = !!data.linked;
+        const queues = Array.isArray(data.queues) ? data.queues : [];
+
+        if (!linked) {
+          // Not linked view (CONNECT1 style)
+          const card = document.createElement('div');
+          card.className = 'queue-card';
+
+          const h = document.createElement('div');
+          h.className = 'queue-header-text';
+          h.textContent = 'CONNECTING CODES';
+          const sub = document.createElement('div');
+          sub.className = 'queue-subtext';
+          sub.textContent = "You're seeing connecting codes. Connect your account to see ranked codes.";
+
+          const row = document.createElement('div');
+          row.className = 'queue-row';
+          const code = document.createElement('div');
+          code.className = 'queue-code';
+          code.textContent = 'CONNECT1';
+
+          const right = document.createElement('div');
+          right.style.display = 'flex';
+          right.style.flexDirection = 'column';
+          right.style.alignItems = 'flex-end';
+
+          const bar = document.createElement('div');
+          bar.className = 'queue-bar';
+          const fill = document.createElement('div');
+          fill.className = 'queue-fill';
+          bar.appendChild(fill);
+
+          const cnt = document.createElement('div');
+          cnt.className = 'queue-count';
+          cnt.textContent = '0 / 9';
+
+          right.appendChild(bar);
+          right.appendChild(cnt);
+
+          row.appendChild(code);
+          row.appendChild(right);
+
+          card.appendChild(h);
+          card.appendChild(sub);
+          card.appendChild(row);
+          container.appendChild(card);
+
+          status.textContent = '';
+          return;
+        }
+
+        // Linked: show real queues
+        if (!queues.length) {
+          status.textContent = "No active ranked lobbies.";
+          return;
+        }
+
+        queues.forEach(q => {
+          const card = document.createElement('div');
+          card.className = 'queue-card';
+
+          const row = document.createElement('div');
+          row.className = 'queue-row';
+
+          const code = document.createElement('div');
+          code.className = 'queue-code';
+          code.textContent = q.code || 'UNKNOWN';
+
+          const right = document.createElement('div');
+          right.style.display = 'flex';
+          right.style.flexDirection = 'column';
+          right.style.alignItems = 'flex-end';
+
+          const bar = document.createElement('div');
+          bar.className = 'queue-bar';
+          const fill = document.createElement('div');
+          fill.className = 'queue-fill';
+          const max = q.max_players || 9;
+          const cur = q.players || 0;
+          const pct = Math.max(0, Math.min(100, (cur / max) * 100));
+          fill.style.width = pct + '%';
+          bar.appendChild(fill);
+
+          const cnt = document.createElement('div');
+          cnt.className = 'queue-count';
+          cnt.textContent = `${cur} / ${max}`;
+
+          right.appendChild(bar);
+          right.appendChild(cnt);
+
+          row.appendChild(code);
+          row.appendChild(right);
+
+          card.appendChild(row);
+          container.appendChild(card);
+        });
+
+        status.textContent = '';
+      } catch (e) {
+        console.error("Failed to load ranked queues", e);
+        status.textContent = "Failed to load ranked queues.";
+      }
+    }
+
+    // ---------- Players leaderboard ----------
+    let currentSort = 'overall';
+
+    const sortButtons = document.querySelectorAll('.sort-btn');
+    sortButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sortButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSort = btn.dataset.sort || 'overall';
+        fetchPlayers();
+      });
+    });
+
+    async function fetchPlayers() {
+      const tbody = document.getElementById('playersBody');
+      const status = document.getElementById('playersStatus');
+      tbody.innerHTML = '';
+      status.textContent = 'Loading players…';
+
+      try {
+        const res = await fetch(API_BASE + "/ranked/players?sort=" + encodeURIComponent(currentSort));
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const players = Array.isArray(data.players) ? data.players : [];
+
+        if (!players.length) {
+          status.textContent = "No ranked players found.";
+          return;
+        }
+
+        players.forEach((p, idx) => {
+          const tr = document.createElement('tr');
+
+          const tdRank = document.createElement('td');
+          tdRank.className = 'rank-col num';
+          tdRank.textContent = p.rank ?? (idx + 1);
+
+          const tdName = document.createElement('td');
+          tdName.textContent = p.name || 'Unknown';
+
+          const tdMMR = document.createElement('td');
+          tdMMR.className = 'num';
+          tdMMR.textContent = typeof p.mmr === 'number' ? p.mmr.toString() : '-';
+
+          const tdPlay = document.createElement('td');
+          tdPlay.className = 'num';
+          tdPlay.textContent = p.playtime || '-';
+
+          tr.appendChild(tdRank);
+          tr.appendChild(tdName);
+          tr.appendChild(tdMMR);
+          tr.appendChild(tdPlay);
+
+          tbody.appendChild(tr);
+        });
+
+        status.textContent = '';
+      } catch (e) {
+        console.error("Failed to load ranked players", e);
+        status.textContent = "Failed to load players.";
+      }
+    }
+
+    // initial load for Ranked tab
+    fetchRankedQueues();
+    setInterval(fetchRankedQueues, 30000);
+  </script>
+</body>
+</html>

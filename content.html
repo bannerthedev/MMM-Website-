@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MMM League – Content</title>
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#2b3b48;
+      --accent:#ff7b26;
+      --muted:#cbd5e1;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+    }
+    .page{min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Header (match rules/teams) */
+    header{
+      height:68px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      position:sticky;
+      top:0;
+      backdrop-filter:blur(6px);
+      z-index:30;
+      background:rgba(2,6,23,0.85);
+    }
+    .nav-inner{
+      width:100%;
+      max-width:1200px;
+      padding:10px 20px;
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      text-decoration:none;
+      color:inherit;
+    }
+    .brand img{height:34px;width:auto;display:block;}
+    .brand .title{font-weight:800;letter-spacing:0.3px;}
+
+    nav{display:flex;gap:16px;align-items:center;}
+    nav a{
+      color:rgba(255,255,255,0.85);
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:8px;
+      font-weight:600;
+      font-size:14px;
+    }
+    nav a.active{color:var(--accent);}
+
+    .right-muted{color:var(--muted);font-size:14px;white-space:nowrap;}
+
+    main{flex:1;}
+    .section{
+      max-width:1100px;margin:20px auto 40px;
+      padding:0 20px;box-sizing:border-box;
+      width:100%;
+    }
+    h1{margin:0 0 8px;font-size:26px;}
+    h2{margin:24px 0 8px;font-size:20px;}
+    .section-sub{margin:0 0 18px;color:var(--muted);font-size:14px;}
+
+    .content-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:14px;
+    }
+    .content-card{
+      border-radius:12px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:12px 12px 14px;
+      cursor:pointer;
+      transition:transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+    .content-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 25px rgba(0,0,0,0.4);
+      border-color:rgba(255,255,255,0.18);
+    }
+    .content-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+    .content-meta{font-size:12px;color:var(--muted);}
+    .pill-live{
+      display:inline-block;padding:2px 8px;border-radius:999px;
+      background:#ef4444;font-size:11px;font-weight:700;margin-left:6px;
+    }
+
+    footer{
+      margin-top:auto;
+      padding:24px 20px;
+      color:#9ca3af;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.02);
+    }
+
+    @media (max-width:920px){
+      nav{display:none;}
+      .right-muted{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <img src="MMM logo.png" alt="MMM League logo">
+          <div class="title">MMM League</div>
+        </a>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html">Teams</a>
+          <a href="content.html" class="active">Content</a>
+          <a href="rules.html">Rules</a>
+          <a href="standings.html">Standings</a>
+        </nav>
+
+        <div class="right-muted">Auto-updates from The MMM League Youtube Channel</div>
+      </div>
+    </header>
+
+    <main class="section">
+      <h1>Content</h1>
+      <p class="section-sub">VODs and Lives from the last 7 days.</p>
+
+      <h2>Vids</h2>
+      <div id="vidsGrid" class="content-grid"></div>
+      <p id="vidsStatus" class="section-sub" style="margin-top:8px;"></p>
+
+      <h2>Lives</h2>
+      <div id="livesGrid" class="content-grid"></div>
+      <p id="livesStatus" class="section-sub" style="margin-top:8px;"></p>
+    </main>
+
+    <footer>
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const YOUTUBE_FEED_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCgCMrgrneSsZP1AE0bG9B1w";
+    let vids = [];
+    let lives = [];
+
+    function classifyEntry(entry) {
+      const yt = "http://www.youtube.com/xml/schemas/2015";
+      const atom = "http://www.w3.org/2005/Atom";
+
+      const title = entry.getElementsByTagNameNS(atom, "title")[0]?.textContent || "";
+      const publishedStr = entry.getElementsByTagNameNS(atom, "published")[0]?.textContent || "";
+      const linkEl = entry.getElementsByTagNameNS(atom, "link")[0];
+      let url = linkEl?.getAttribute("href") || "";
+      const videoId = entry.getElementsByTagNameNS(yt, "videoId")[0]?.textContent || null;
+      if (!url && videoId) url = "https://www.youtube.com/watch?v=" + videoId;
+
+      const liveBroadcastEl = entry.getElementsByTagNameNS(yt, "liveBroadcast")[0];
+      let kind = "vod";
+      const tLower = title.toLowerCase();
+
+      if (liveBroadcastEl && liveBroadcastEl.textContent) {
+        const val = liveBroadcastEl.textContent.trim().toLowerCase();
+        if (val === "live" || val === "true") kind = "live";
+        else if (val === "upcoming") kind = "upcoming";
+      } else if ((tLower.includes("live") || tLower.includes("stream")) && !tLower.includes("upcoming")) {
+        kind = "live";
+      }
+
+      let published = null;
+      if (publishedStr) {
+        const d = new Date(publishedStr);
+        if (!isNaN(d.getTime())) published = d;
+      }
+
+      return { title, url, kind, published };
+    }
+
+    function filterLast7Days(entries) {
+      const now = new Date();
+      const cutoff = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+      return entries.filter(e => e.published && e.published.getTime() >= cutoff);
+    }
+
+    function renderList(list, gridId, statusId, isLive) {
+      const grid = document.getElementById(gridId);
+      const status = document.getElementById(statusId);
+      grid.innerHTML = "";
+      status.textContent = "";
+
+      if (!list.length) {
+        status.textContent = "No " + (isLive ? "lives" : "videos") + " found in the last 7 days.";
+        return;
+      }
+
+      list.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "content-card";
+        card.onclick = () => window.open(item.url, "_blank");
+
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "content-title";
+        titleDiv.textContent = item.title;
+        if (isLive) {
+          const pill = document.createElement("span");
+          pill.className = "pill-live";
+          pill.textContent = "LIVE";
+          titleDiv.appendChild(pill);
+        }
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "content-meta";
+        if (item.published) {
+          const d = item.published;
+          metaDiv.textContent = d.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          });
+        }
+
+        card.appendChild(titleDiv);
+        card.appendChild(metaDiv);
+        grid.appendChild(card);
+      });
+    }
+
+    async function fetchYouTubeContent() {
+      const vidsStatus = document.getElementById("vidsStatus");
+      const livesStatus = document.getElementById("livesStatus");
+      vidsStatus.textContent = "Loading videos…";
+      livesStatus.textContent = "Loading lives…";
+
+      try {
+        const res = await fetch(YOUTUBE_FEED_URL);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const text = await res.text();
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "application/xml");
+        const entries = Array.from(xml.getElementsByTagNameNS("http://www.w3.org/2005/Atom", "entry"));
+
+        let parsed = entries.map(classifyEntry);
+        parsed = filterLast7Days(parsed);
+
+        vids = parsed.filter(e => e.kind === "vod");
+        lives = parsed.filter(e => e.kind === "live");
+
+        vidsStatus.textContent = "";
+        livesStatus.textContent = "";
+
+        renderList(vids, "vidsGrid", "vidsStatus", false);
+        renderList(lives, "livesGrid", "livesStatus", true);
+      } catch (e) {
+        console.error("Failed to load YouTube feed", e);
+        vidsStatus.textContent = "Failed to load videos.";
+        livesStatus.textContent = "Failed to load lives.";
+      }
+    }
+
+    fetchYouTubeContent();
+    setInterval(fetchYouTubeContent, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

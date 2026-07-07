@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MMM League – Caster Panel</title>
+<style>
+  :root{
+    --bg:#020617;
+    --panel:#020617;
+    --accent:#22c55e;
+    --accent-soft:#14532d;
+    --accent-danger:#ef4444;
+    --text:#e5e7eb;
+    --muted:#6b7280;
+    --border:#1f2933;
+    --input-bg:#020617;
+    --input-border:#1f2933;
+    --btn:#22c55e;
+    --btn-hover:#16a34a;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  html,body{height:100%;margin:0;background:#020617;color:var(--text);}
+  header{
+    height:60px;display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid var(--border);
+    background:#020617;position:sticky;top:0;z-index:20;
+  }
+  .nav-inner{
+    width:100%;max-width:1200px;padding:10px 24px;box-sizing:border-box;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+  .brand img{height:30px}
+  .brand span{font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af}
+  .right{font-size:13px;color:var(--muted);}
+  .page{min-height:calc(100vh - 60px);display:flex;flex-direction:column;background:#020617;}
+  .wrap{flex:1;display:flex;align-items:stretch;justify-content:center;padding:24px;box-sizing:border-box;}
+  .card{
+    width:100%;max-width:1100px;display:flex;gap:24px;background:var(--panel);
+    border-radius:12px;border:1px solid var(--border);
+    box-shadow:0 18px 40px rgba(0,0,0,0.65);padding:18px;box-sizing:border-box;
+  }
+  @media (max-width:900px){
+    .wrap{padding:14px;}
+    .card{flex-direction:column;}
+  }
+  .left{flex:0 0 320px;display:flex;flex-direction:column;gap:12px;border-right:1px solid #111827;padding-right:18px;}
+  @media (max-width:900px){.left{border-right:none;border-bottom:1px solid #111827;padding-right:0;padding-bottom:12px;}}
+  .right-panel{flex:1;display:flex;flex-direction:column;padding-left:6px;}
+  .section-title{font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;}
+  .field{margin-bottom:10px;}
+  label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:4px;}
+  select, input, textarea{
+    width:100%;box-sizing:border-box;
+    background:var(--input-bg);border:1px solid var(--input-border);
+    color:var(--text);border-radius:6px;
+    padding:7px 8px;font-size:13px;outline:none;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--accent);}
+  textarea{min-height:70px;resize:vertical;}
+  .row{display:flex;gap:8px;}
+  .row > div{flex:1;}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;
+    background:#111827;color:var(--muted);
+  }
+  .dot{
+    width:8px;height:8px;border-radius:999px;background:var(--muted);
+  }
+  .status-live{background:var(--accent-soft);color:#bbf7d0;}
+  .status-live .dot{background:#4ade80;}
+  .status-wait{background:#111827;color:#fbbf24;}
+  .status-wait .dot{background:#f59e0b;}
+  .status-off{background:#111827;color:#9ca3af;}
+  .status-off .dot{background:#6b7280;}
+  .button{
+    background:var(--btn);border:none;color:#022c22;
+    font-weight:700;font-size:14px;border-radius:999px;
+    padding:9px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  }
+  .button:hover{background:var(--btn-hover);}
+  .button:disabled{opacity:0.4;cursor:default;}
+  .status-line{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .label-small{font-size:11px;color:var(--muted);}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono",monospace;font-size:12px;}
+  .mono-box{
+    background:#020617;border-radius:6px;border:1px solid #1f2937;
+    padding:6px 8px;margin-bottom:6px;word-break:break-all;
+  }
+  .title-preview{
+    font-size:14px;font-weight:600;margin-bottom:4px;color:#e5e7eb;
+  }
+  .desc-preview{
+    font-size:12px;white-space:pre-wrap;color:#9ca3af;
+    padding:8px 8px;border-radius:6px;background:#020617;border:1px solid #1f2937;
+  }
+  .hint{font-size:11px;color:#6b7280;margin-top:2px;}
+  .error{color:var(--accent-danger);font-size:12px;margin-top:4px;}
+  footer{
+    padding:10px 18px;color:#6b7280;font-size:12px;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .madeby a{color:#60a5fa;text-decoration:none;font-weight:700}
+  .madeby a:hover{text-decoration:underline}
+  .mmm-logo{height:22px;width:auto;display:block;opacity:0.85}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <img src="MMM logo.png" alt="MMM logo">
+      <span>MONKE MONKE MONKE LEAGUE</span>
+    </a>
+
+    <div class="right">Caster Broadcast Console</div>
+  </div>
+</header>
+
+
+<div class="page">
+  <div class="wrap">
+    <div class="card">
+      <div class="left">
+        <div>
+          <div class="section-title">Match</div>
+          <div class="field">
+            <label>Team 1</label>
+            <select id="team1Select">
+              <option value="">Select team…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Team 2</label>
+            <select id="team2Select">
+              <option value="">Select team…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Round Label</label>
+            <input id="roundInput" type="text" value="Bracket Round 1" />
+            <div class="hint">Used in the title after “Monke Monke Monke”.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Broadcast Controls</div>
+          <div class="status-line">
+            <div>
+              <div class="label-small">Status</div>
+              <div id="statusPill" class="status-pill status-off">
+                <span class="dot"></span>
+                <span id="statusText">Stream Ended</span>
+              </div>
+            </div>
+            <button id="createBtn" class="button">
+              <span>CREATE BROADCAST</span>
+            </button>
+          </div>
+          <div id="errorBox" class="error" style="display:none;"></div>
+        </div>
+
+        <div>
+          <div class="section-title">OBS Details</div>
+          <div class="field">
+            <label>Stream Key</label>
+            <div id="streamKeyBox" class="mono-box mono">Not created yet.</div>
+          </div>
+          <div class="field">
+            <label>YouTube URL</label>
+            <div id="ytUrlBox" class="mono-box mono">Not created yet.</div>
+          </div>
+          <div class="hint">
+            After clicking <b>Create Broadcast</b>, copy the stream key from YouTube Studio into OBS.  
+            When you go live, the existing YouTube poller will announce it in Discord.
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div>
+          <div class="section-title">YouTube Metadata Preview</div>
+          <div class="field">
+            <label>Title</label>
+            <div id="titlePreview" class="title-preview">
+              Team 1 vs Team 2 | Monke Monke Monke | Bracket Round 1
+            </div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <div id="descPreview" class="desc-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="madeby">
+      Made by
+      <a href="https://discord.com/users/1101643714033623120" target="_blank" rel="noopener">1101643714033623120</a>
+    </div>
+    <img class="mmm-logo" src="MMM logo.png" alt="MMM Logo">
+  </footer>
+</div>
+
+<script>
+  const API_BASE = "https://mmm-transactions-bot-v2-production.up.railway.app";
+  const TEAMS_API_URL = API_BASE + "/teams";
+  const CREATE_BROADCAST_URL = API_BASE + "/create_broadcast";
+
+  const t1Sel = document.getElementById("team1Select");
+  const t2Sel = document.getElementById("team2Select");
+  const roundInput = document.getElementById("roundInput");
+  const titlePreview = document.getElementById("titlePreview");
+  const descPreview = document.getElementById("descPreview");
+  const statusPill = document.getElementById("statusPill");
+  const statusText = document.getElementById("statusText");
+  const createBtn = document.getElementById("createBtn");
+  const streamKeyBox = document.getElementById("streamKeyBox");
+  const ytUrlBox = document.getElementById("ytUrlBox");
+  const errorBox = document.getElementById("errorBox");
+
+  const BASE_DESC =
+`Website: 
+https://monkeleague.com/
+
+Appexinno discord:
+https://discord.gg/A9x94v8z85
+`;
+
+  function updatePreview() {
+    const t1 = t1Sel.value || "Team 1";
+    const t2 = t2Sel.value || "Team 2";
+    const round = roundInput.value.trim() || "Bracket Round 1";
+
+    const title = `${t1} vs ${t2} | Monke Monke Monke | ${round}`;
+    titlePreview.textContent = title;
+    descPreview.textContent = BASE_DESC;
+  }
+
+  async function loadTeams() {
+    try {
+      const res = await fetch(TEAMS_API_URL);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      const teams = (data.teams || []).slice().sort((a,b)=>a.name.localeCompare(b.name));
+
+      [t1Sel, t2Sel].forEach(sel => {
+        sel.innerHTML = '<option value="">Select team…</option>';
+        teams.forEach(team => {
+          const opt = document.createElement("option");
+          opt.value = team.name;
+          opt.textContent = team.name;
+          sel.appendChild(opt);
+        });
+      });
+
+      updatePreview();
+    } catch (e) {
+      console.error(e);
+      errorBox.style.display = "block";
+      errorBox.textContent = "Failed to load teams.";
+    }
+  }
+
+  function setStatus(mode){
+    statusPill.classList.remove("status-live","status-wait","status-off");
+
+    if (mode === "waiting") {
+      statusPill.classList.add("status-wait");
+      statusText.textContent = "Waiting for OBS";
+    } else if (mode === "live") {
+      statusPill.classList.add("status-live");
+      statusText.textContent = "Live on YouTube";
+    } else {
+      statusPill.classList.add("status-off");
+      statusText.textContent = "Stream Ended";
+    }
+  }
+
+  t1Sel.addEventListener("change", updatePreview);
+  t2Sel.addEventListener("change", updatePreview);
+  roundInput.addEventListener("input", updatePreview);
+
+  createBtn.addEventListener("click", async () => {
+    errorBox.style.display = "none";
+    const team1 = t1Sel.value;
+    const team2 = t2Sel.value;
+    const round = roundInput.value.trim() || "Bracket Round 1";
+
+    if (!team1 || !team2 || team1 === team2) {
+      errorBox.style.display = "block";
+      errorBox.textContent = "Select two different teams.";
+      return;
+    }
+
+    createBtn.disabled = true;
+    createBtn.textContent = "Creating…";
+    setStatus("waiting");
+    streamKeyBox.textContent = "Requesting broadcast info…";
+    ytUrlBox.textContent = "Requesting YouTube URL…";
+
+    const title = `${team1} vs ${team2} | Monke Monke Monke | ${round}`;
+    const description = BASE_DESC;
+
+    try {
+      const res = await fetch(CREATE_BROADCAST_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team1, team2, round, title, description })
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Unknown error");
+
+      const streamKey = data.stream_key || "Use the key from YouTube Studio";
+      const ytUrl = data.youtube_url || "No URL returned.";
+
+      streamKeyBox.textContent = streamKey;
+      ytUrlBox.textContent = ytUrl;
+      setStatus("waiting"); // OBS not started yet
+    } catch (e) {
+      console.error(e);
+      errorBox.style.display = "block";
+      errorBox.textContent = "Failed to create broadcast.";
+      setStatus("off");
+      streamKeyBox.textContent = "Not created.";
+      ytUrlBox.textContent = "Not created.";
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = "CREATE BROADCAST";
+    }
+  });
+
+  // initial state
+  descPreview.textContent = BASE_DESC;
+  updatePreview();
+  loadTeams();
+</script>
+</body>
+</html>

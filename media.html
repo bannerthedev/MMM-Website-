@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MMM League – Media Team</title>
+  <style>
+    :root{
+      --bg1:#0f1724; --bg2:#2b3b48; --muted:#cbd5e1; --accent:#2563eb;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#fff}
+    .page{min-height:100vh;display:flex;flex-direction:column}
+    header{
+      height:68px;display:flex;align-items:center;justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      position:sticky;top:0;backdrop-filter:blur(6px);z-index:30;
+      background:rgba(2,6,23,0.85);
+    }
+    .nav-inner{
+      width:100%;max-width:1200px;padding:10px 20px;box-sizing:border-box;
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+    }
+    .brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+    .brand img{height:34px}
+    nav{display:flex;gap:16px;align-items:center}
+    nav a{color:rgba(255,255,255,0.85);text-decoration:none;padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px}
+    nav a.active{color:var(--accent)}
+    main{flex:1;max-width:1100px;margin:20px auto 40px;padding:0 20px;box-sizing:border-box;width:100%}
+    .muted{color:var(--muted)}
+    .card{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px;
+      padding:16px;
+    }
+    footer{margin-top:auto;padding:24px 20px;color:#9ca3af;text-align:center;border-top:1px solid rgba(255,255,255,0.02)}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <img src="MMM logo.png" alt="MMM League logo">
+          <div style="font-weight:800">MMM League</div>
+        </a>
+
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="teams.html">Teams</a>
+          <a href="content.html">Content</a>
+          <a href="rules.html">Rules</a>
+          <a href="standings.html">Standings</a>
+          <a href="ref.html">Blue</a>
+        </nav>
+
+        <div class="muted">Media Team Only</div>
+      </div>
+    </header>
+
+    <main>
+      <h1 style="margin:0 0 8px;">Media Team</h1>
+      <p class="muted" style="margin:0 0 18px;">Private tools and info for casters/referees.</p>
+
+      <div id="statusBox" class="card">Checking access…</div>
+
+      <div id="privateContent" style="display:none;margin-top:14px;" class="card">
+        <h2 style="margin:0 0 8px;">Private Content</h2>
+        <p class="muted" style="margin:0;">
+          Put your private links, docs, schedules, overlays, etc. here.
+        </p>
+      </div>
+    </main>
+
+    <footer>© <span id="year"></span> MMM League</footer>
+  </div>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // IMPORTANT: use SAME-ORIGIN endpoints so cookies work
+  const AUTH_ME_URL = "/auth/me";
+  const AUTH_LOGIN_URL = "/auth/discord/login";
+
+  async function checkAccess(){
+    const statusBox = document.getElementById("statusBox");
+    const privateContent = document.getElementById("privateContent");
+
+    try{
+      const res = await fetch(AUTH_ME_URL, { credentials: "include" });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+
+      if(!data.ok){
+        // Not logged in / not allowed -> go to Discord login
+        window.location.href = AUTH_LOGIN_URL;
+        return;
+      }
+
+      statusBox.textContent = "Access granted. Welcome!";
+      privateContent.style.display = "";
+    }catch(e){
+      console.error(e);
+      statusBox.textContent = "Failed to check access. Please try again.";
+    }
+  }
+
+  checkAccess();
+</script>
+</body>
+</html>

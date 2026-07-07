@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MMM League – Home</title>
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#2b3b48;
+      --accent:#ff7b26;
+      --muted:#cbd5e1;
+      --card: rgba(255,255,255,0.03);
+      --nav-height:68px;
+      --max-width:1100px;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#fff;-webkit-font-smoothing:antialiased}
+    .page{min-height:100vh;display:flex;flex-direction:column}
+    header{
+      height:var(--nav-height);
+      display:flex;align-items:center;justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      position:sticky;top:0;backdrop-filter:blur(6px);z-index:30;
+      background:rgba(2,6,23,0.85)
+    }
+    .nav-inner{width:100%;max-width:1200px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;box-sizing:border-box}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .brand img{height:40px;width:auto;display:block}
+    .brand .title{font-weight:700;letter-spacing:0.6px}
+    nav{display:flex;gap:16px;align-items:center}
+    nav a{color:rgba(255,255,255,0.85);text-decoration:none;padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px}
+    nav a.active{color:var(--accent)}
+    .actions{display:flex;gap:10px;align-items:center}
+    .btn{padding:9px 14px;border-radius:10px;font-weight:700;border:1px solid rgba(255,255,255,0.06);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;color:#fff;background:transparent;font-size:14px}
+    .btn.primary{background:linear-gradient(90deg,#2a7fff66,#6fa8ff22);border:1px solid rgba(255,255,255,0.08)}
+    .btn.discord{background:#5865F2}
+    .btn.youtube{background:#FF0000}
+    .btn.blue{background:#2563eb;border:none;}
+
+    .hero{width:100%;max-width:var(--max-width);margin:36px auto 32px;display:flex;gap:32px;align-items:center;padding:30px;box-sizing:border-box}
+    .hero-left{flex:1;min-width:260px}
+    h1{font-size:48px;line-height:1.02;margin:0 0 16px;letter-spacing:0.6px;color:#fff}
+    h1 .accent{color:var(--accent)}
+    p.lead{color:var(--muted);margin:0 0 24px;max-width:720px}
+    .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:14px;border:1px solid rgba(255,255,255,0.03)}
+    .hero-right{width:360px;display:flex;align-items:center;justify-content:center;min-width:160px}
+    .logo-placeholder{width:320px;height:190px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.04)}
+
+    .section{width:100%;max-width:var(--max-width);margin:0 auto 40px;padding:0 20px;box-sizing:border-box}
+
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:32px}
+    .stat-card{background:rgba(10,12,30,0.9);border-radius:14px;border:1px solid rgba(255,255,255,0.06);padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box}
+    .stat-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+    .stat-icon{width:28px;height:28px;border-radius:10px;background:rgba(249,115,22,0.12);display:flex;align-items:center;justify-content:center;font-size:16px}
+    .stat-value{font-size:22px;font-weight:700}
+    .stat-bottom{font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;margin-top:2px}
+
+    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:28px}
+    .feature-card{background:rgba(10,12,30,0.85);border-radius:14px;border:1px solid rgba(255,255,255,0.06);padding:16px 16px 14px;box-sizing:border-box}
+    .feature-title{font-size:15px;font-weight:700;margin-bottom:6px;letter-spacing:0.5px}
+    .feature-desc{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:36px}
+    .feature-footer{display:flex;justify-content:flex-end}
+    .feature-link{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+
+    .cta-bar{background:linear-gradient(90deg,#1e293b,#4f46e5);border-radius:16px;padding:18px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,0.08)}
+    .cta-text-main{font-size:18px;font-weight:700;letter-spacing:0.5px}
+    .cta-text-sub{font-size:13px;color:#e5e7eb;margin-top:4px}
+
+    footer{padding:24px 20px;color:#9ca3af;text-align:center;border-top:1px solid rgba(255,255,255,0.02)}
+    @media (max-width:880px){
+      h1{font-size:34px}
+      .hero{flex-direction:column-reverse;gap:18px;padding:18px}
+      .hero-right{width:100%}
+      .logo-placeholder{width:70%;height:160px}
+      nav{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <img src="MMM logo.png" alt="MMM League logo">
+          <div class="title">MMM League</div>
+        </a>
+<nav>
+  <a href="/" class="active">Home</a>
+  <a href="/teams">Teams</a>
+  <a href="/content">Content</a>
+  <a href="/rules">Rules</a>
+  <a href="/standings">Standings</a>
+</nav>
+
+
+<div class="actions">
+<a
+  class="btn blue"
+  href="https://mmm-transactions-bot-v2-production.up.railway.app/auth/discord/login?target=media"
+>
+  Media Team
+</a>
+
+
+  <a class="btn discord" href="https://discord.gg/mmml" target="_blank" rel="noopener">Discord</a>
+  <a class="btn youtube" href="https://www.youtube.com/@MMM_League" target="_blank" rel="noopener">YouTube</a>
+</div>
+
+
+      </div>
+    </header>
+
+    <main style="flex:1">
+      <section class="hero">
+        <div class="hero-left">
+          <div style="display:inline-block;padding:6px 12px;border-radius:18px;background:rgba(255,123,38,0.08);color:var(--accent); font-weight:700; font-size:13px; margin-bottom:12px">
+            SEASON 2026 — LIVE
+          </div>
+          <h1>THE APEX OF <span class="accent">GORILLA</span><br>TAG <span style="color:#b892ff">COMPETITION</span>.</h1>
+          <p class="lead">
+            MMM League is the home of high-stakes 4v4 VR brawls. Climb the seedings, grind the bracket, and earn your spot in the top 16.
+          </p>
+          <div class="hero-cta">
+            <a class="btn card" href="standings.html">VIEW STANDINGS</a>
+            <a class="btn" href="teams.html">VIEW TEAMS</a>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="logo-placeholder card">
+            <img src="MMM logo.png" alt="MMM League logo" style="max-width:100%; max-height:100%; object-fit:contain">
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <!-- STATS ROW -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon">👥</div>
+              <div class="stat-value" id="homeMemberCount">0</div>
+            </div>
+            <div class="stat-bottom">Members</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon">🟢</div>
+              <div class="stat-value" id="homeOnlineCount">0</div>
+            </div>
+            <div class="stat-bottom">Online</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon">👥</div>
+              <div class="stat-value" id="homeTeamCount">0</div>
+            </div>
+            <div class="stat-bottom">Teams</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon">📌</div>
+              <div class="stat-value" id="homeStatus">Idle</div>
+            </div>
+            <div class="stat-bottom">Status</div>
+          </div>
+        </div>
+
+        <!-- FEATURE BUTTON CARDS -->
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-title">RULEBOOK</div>
+            <div id="homeRules" class="feature-desc">Loading rules…</div>
+            <div class="feature-footer">
+              <a class="feature-link" href="rules.html">READ ALL →</a>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-title">TEAMS</div>
+            <div class="feature-desc">
+              Browse every registered team and live rosters synced from Discord.
+            </div>
+            <div class="feature-footer">
+              <a class="feature-link" href="teams.html">EXPLORE →</a>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-title">CONTENT</div>
+            <div class="feature-desc">
+              Latest MMM League VODs and live streams from the last 7 days.
+            </div>
+            <div class="feature-footer">
+              <a class="feature-link" href="content.html">EXPLORE →</a>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-title">STANDINGS</div>
+            <div class="feature-desc">
+              Live seeding and ranking across the league’s competitive season.
+            </div>
+            <div class="feature-footer">
+              <a class="feature-link" href="standings.html">EXPLORE →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-bar">
+          <div>
+            <div class="cta-text-main">JOIN THE PACK.</div>
+            <div class="cta-text-sub">
+              Sign up your team, find scrims, get match alerts, and connect with the community on Discord.
+            </div>
+          </div>
+          <a class="btn discord" href="https://discord.gg/mmml" target="_blank" rel="noopener">
+            DISCORD.GG/MMML
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      © <span id="year"></span> MMM League
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const API_BASE = "https://mmm-transactions-bot-v2-production.up.railway.app";
+    const MEMBER_API_URL = API_BASE + "/member_count";
+
+    // If your site is hosted on a different domain than the API, use:
+    // const RULES_API = API_BASE + "/rules";
+    const RULES_API = "/rules";
+
+    async function updateHomeStats() {
+      try {
+        const res = await fetch(MEMBER_API_URL);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        if (typeof data.member_count === "number") {
+          const memberEl = document.getElementById("homeMemberCount");
+          if (memberEl) memberEl.textContent = data.member_count.toString();
+        }
+        if (typeof data.online_count === "number") {
+          const onlineEl = document.getElementById("homeOnlineCount");
+          if (onlineEl) onlineEl.textContent = data.online_count.toString();
+        }
+        if (typeof data.team_count === "number") {
+          const teamEl = document.getElementById("homeTeamCount");
+          if (teamEl) teamEl.textContent = data.team_count.toString();
+        }
+        if (typeof data.status === "string") {
+          const statusEl = document.getElementById("homeStatus");
+          if (statusEl) statusEl.textContent = data.status;
+        }
+      } catch (e) {
+        console.error("Failed to load stats for home page", e);
+      }
+    }
+
+    async function loadHomeRules() {
+      const el = document.getElementById("homeRules");
+      if (!el) return;
+
+      try {
+        const res = await fetch(RULES_API);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const sections = data.sections || [];
+
+        if (!sections.length) {
+          el.textContent = "No rules found.";
+          return;
+        }
+
+        const first = sections[0];
+
+        // strip HTML to get a short text preview
+        const tmp = document.createElement("div");
+        tmp.innerHTML = first.html || "";
+        const p = tmp.querySelector("p") || tmp.firstChild;
+        const text = p ? (p.textContent || "").trim() : "";
+
+        el.innerHTML =
+          `<strong style="display:block;margin-bottom:6px">${first.title}</strong>` +
+          (text
+            ? `<div style="color:var(--muted);font-size:13px">${text.slice(0,250)}${text.length > 250 ? "…" : ""}</div>`
+            : `<div style="color:var(--muted);font-size:13px">No preview available.</div>`);
+      } catch (e) {
+        el.textContent = "Failed to load rules.";
+        console.error("loadHomeRules error", e);
+      }
+    }
+
+    updateHomeStats();
+    loadHomeRules();
+
+    setInterval(updateHomeStats, 60000);
+    setInterval(loadHomeRules, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
